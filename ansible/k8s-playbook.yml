@@ -1,0 +1,4 @@
+- hosts: localhost
+  roles:
+    - k8s-base
+    - k8s-master
