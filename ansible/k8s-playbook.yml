@@ -1,4 +1,20 @@
-- hosts: localhost
-  roles:
-    - k8s-base
-    - k8s-master
+- hosts: master
+  tasks:
+    - name: 'Atualiza/instala os pacotes necessários para utilizar o repositório apt do Kubernetes'
+      apt: 
+        name: ['apt-transport-https', 'ca-certificates curl']
+        state: latest
+      become: yes
+
+    - name: 'Download da chave de assinatura pública da Google Cloud'
+      apt_key: 
+        name: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+      become: yes
+
+    - name: 'Adiciona o repositório apt do Kubernetes'
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        update_cache: yes
+      become: yes

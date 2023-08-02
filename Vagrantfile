@@ -1,8 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Box
-box = "ubuntu/focal64"
+# Conf
+box = "ubuntu/focal64" 
 # Master
 numeroMaster = 1
 memoriaMaster = 2048
@@ -17,6 +17,7 @@ Vagrant.configure("2") do |config|
   (1..numeroMaster).each do |i|
     config.vm.define "Master-#{i}" do |master|
       master.vm.hostname = "Master#{i}"
+      master.vm.network "private_network", ip: "192.168.56.#{i}"
 
       master.vm.provision "shell",
         inline: "cat /vagrant/configs/ssh/id_rsa.pub >> .ssh/authorized_keys"
@@ -26,6 +27,8 @@ Vagrant.configure("2") do |config|
   (1..numeroWorker).each do |i|
     config.vm.define "Worker-#{i}" do |worker|
       worker.vm.hostname = "worker#{i}"
+      worker.vm.network "private_network", ip: "192.168.56.#{30+i}"
+
 
       worker.vm.provision "shell",
         inline: "cat /vagrant/configs/ssh/id_rsa.pub >> .ssh/authorized_keys"
@@ -33,7 +36,7 @@ Vagrant.configure("2") do |config|
   end
   
   config.vm.define "ansible" do |ansible|
-    ansible.vm.network "public_network", ip: "192.168.1.19", bridge: "enp0s31f6"
+    ansible.vm.network "public_network", ip: "192.168.56.99", bridge: "enp0s31f6"
     
     ansible.vm.provision "shell",
       inline: "apt-get update && \
@@ -48,7 +51,7 @@ Vagrant.configure("2") do |config|
       && chown vagrant:vagrant /home/vagrant/.ssh/id_rsa"            
       
     ansible.vm.provision "shell",
-        inline: "ansible-playbook -i /vagrant/hosts /vagrant/playbook.yml"
+        inline: "ansible-playbook -i /vagrant/ansible/hosts /vagrant/ansible/k8s-playbook.yml"
   end
 
 end
