@@ -3,12 +3,11 @@
 
 # Conf
 box = "ubuntu/focal64" 
-# Master
-numeroMaster = 1
-memoriaMaster = 2048
-# Worker
-numeroWorker = 1
-memoriaWorker = 1024
+#
+vms = {
+  'master-1' => {'memory' => '2048', 'cpus' => 1, 'ip' => '10'},
+  'worker-1' => {'memory' => '2048', 'cpus' => 1, 'ip' => '20'},
+}
 
 # Instalando o Ansible
 $script_ansible = <<-SCRIPT
@@ -20,43 +19,27 @@ apt-get install -y ansible
 SCRIPT
 
 Vagrant.configure("2") do |config|
+  config.vm.box_check_update = false
   config.vm.box = box
   
-  (1..numeroMaster).each do |i|
-    config.vm.define "master#{i}" do |master|
-      master.vm.hostname = "master#{i}"
-      master.vm.network "public_network", ip: "192.168.1.#{1+i}", bridge: "enp0s31f6", auto_config: true
+  vms.each do |name, conf|
+    config.vm.define "#{name}" do |v|
+      v.vm.hostname = "#{name}.ama.dev" 
+      v.vm.network 'private_network', ip: "192.168.56.#{conf['ip']}"
      
-      master.vm.provision "shell",
-        inline: "cat /vagrant/roles/k8s-base/files/id_rsa.pub >> .ssh/authorized_keys"
+      v.vm.provision "shell",
+          inline: "cat /vagrant/roles/k8s-base/files/id_rsa.pub >> .ssh/authorized_keys"
 
-      master.vm.provider "virtualbox" do |vmaster|
-        vmaster.name = "master#{i}"
-        vmaster.memory = memoriaMaster
-        vmaster.gui = false
+      v.vm.provider "virtualbox" do |vb|
+        vb.name = name
+        vb.memory = conf['memory']
+        vb.cpus = conf['cpus']
       end
     end
-  end
-
-  (1..numeroWorker).each do |i|
-    config.vm.define "worker#{i}" do |worker|
-      worker.vm.hostname = "worker#{i}"
-      worker.vm.network "public_network", ip: "192.168.1.#{31+i}", bridge: "enp0s31f6", auto_config: true
-     
-      worker.vm.provision "shell",
-        inline: "cat /vagrant/roles/k8s-base/files/id_rsa.pub >> .ssh/authorized_keys"
-      
-      worker.vm.provider "virtualbox" do |vworker|
-        vworker.name = "worker#{i}"
-        vworker.memory = memoriaWorker
-        vworker.gui = false
-      end
-    end
-
   end
   
   config.vm.define "ansible" do |ansible|
-    ansible.vm.network "public_network", ip: "192.168.1.99", bridge: "enp0s31f6", auto_config: true
+    ansible.vm.network "public_network", ip: "192.168.56.99"
     
     ansible.vm.provision "shell", inline: $script_ansible
 
