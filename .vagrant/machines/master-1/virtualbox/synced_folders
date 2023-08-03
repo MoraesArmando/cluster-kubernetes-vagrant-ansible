@@ -1,1 +1,0 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/armando/Documentos/dev/pessoal/cluster-kubernetes-vagrant-ansible","disabled":false,"__vagrantfile":true},"vagrant-cache":{"id":"vagrant-cache","guestpath":"/tmp/vagrant-cache","hostpath":"/home/armando/.vagrant.d/cache/ubuntu/focal64","disabled":false,"__vagrantfile":true}}}

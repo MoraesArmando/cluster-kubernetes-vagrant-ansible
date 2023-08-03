@@ -1,0 +1,4 @@
+---
+- name: Ensure kubeadm initialization
+  command: "kubeadm init --token=4aNE1.0CKaTO.xQmWKBu4vc --api-advertise-addresses=172.42.42.11 --pod-network-cidr 10.244.0.0/16"
+  become: yes

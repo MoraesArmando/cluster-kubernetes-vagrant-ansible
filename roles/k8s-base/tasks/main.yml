@@ -27,7 +27,7 @@
 - name: Remove Default Host Entry
   lineinfile:
     dest: /etc/hosts
-    regexp: '^127\.0\.0\.1\s+[master|worker].*$'
+    regexp: '^127\.0\.2\.1\s+[control-plane-|worker-].*$'
     state: absent
   become: yes
 
@@ -36,8 +36,8 @@
     dest: /etc/hosts
     line: "{{ item.ip }} {{ item.name }}"
   with_items:
-    - { ip: "192.168.1.2", name: "master1" }
-    - { ip: "192.168.1.32", name: "worker1" }
+    - { ip: "192.168.56.10", name: "control-plane-1" }
+    - { ip: "192.168.56.20", name: "worker-1" }
   become: yes
 
 - name: 'Atualiza/instala os pacotes necessários para utilizar o repositório apt do Kubernetes'
@@ -69,5 +69,6 @@
       - kubelet
       - kubeadm
       - kubectl
+      - kubernetes-cni
     state: latest
   become: yes

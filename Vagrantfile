@@ -5,9 +5,9 @@
 box = "ubuntu/focal64" 
 #
 vms = {
-  'master-1' => {'memory' => '2048', 'cpus' => 1, 'ip' => '10'},
-  'worker-1' => {'memory' => '2048', 'cpus' => 1, 'ip' => '20'},
+  'control-plane-1' => {'memory' => '2048', 'cpus' => 2, 'ip' => '10'}
 }
+#'worker-1' => {'memory' => '2048', 'cpus' => 1, 'ip' => '20'},
 
 # Instalando o Ansible
 $script_ansible = <<-SCRIPT
@@ -19,7 +19,7 @@ apt-get install -y ansible
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.box_check_update = false
+  # config.vm.box_check_update = false
   config.vm.box = box
   
   vms.each do |name, conf|
@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
           inline: "cat /vagrant/roles/k8s-base/files/id_rsa.pub >> .ssh/authorized_keys"
 
       v.vm.provider "virtualbox" do |vb|
-        vb.name = name
+        # vb.name = name
         vb.memory = conf['memory']
         vb.cpus = conf['cpus']
       end
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
   end
   
   config.vm.define "ansible" do |ansible|
-    ansible.vm.network "public_network", ip: "192.168.56.99"
+    ansible.vm.network "private_network", ip: "192.168.56.99"
     
     ansible.vm.provision "shell", inline: $script_ansible
 
